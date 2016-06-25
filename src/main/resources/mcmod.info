@@ -1,0 +1,16 @@
+[
+{
+  "modid": "customachievements",
+  "name": "Custom Achievements",
+  "description": "Allows players to add vanilla-like achievements",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["MrIbby"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
