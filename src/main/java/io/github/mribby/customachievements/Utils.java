@@ -1,7 +1,5 @@
 package io.github.mribby.customachievements;
 
-import io.github.mribby.customachievements.data.OreStack;
-import io.github.mribby.customachievements.data.Wildcard;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
@@ -15,7 +13,6 @@ import net.minecraftforge.oredict.OreDictionary;
 
 public class Utils {
     private static final String WILDCARD = "*";
-    private static final String ORE_PREFIX = "*:";
 
     public static ItemStack getItemStackByText(String text) {
         if (StringUtils.isNullOrEmpty(text)) {
@@ -92,17 +89,5 @@ public class Utils {
         } else {
             return (Achievement) StatList.func_151177_a(String.format("achievement.%s", id));
         }
-    }
-
-    public static Object getDataByObject(Object obj) {
-        if (obj instanceof String) {
-            String s = (String) obj;
-            if (s.equals(WILDCARD)) {
-                return Wildcard.INSTANCE;
-            } else if (s.startsWith(ORE_PREFIX)) {
-                return new OreStack(s.substring(ORE_PREFIX.length()));
-            }
-        }
-        return null;
     }
 }
