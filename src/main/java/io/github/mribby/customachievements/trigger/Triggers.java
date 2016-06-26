@@ -10,4 +10,5 @@ public class Triggers {
     public static final ItemStackTrigger SMELT = new ItemStackTrigger("smelt");
     //TODO public static final ItemStackTrigger BREW = new ItemStackTrigger("brew");
     public static final EntityClassTrigger KILL = new EntityClassTrigger("kill");
+    public static final EntityClassTrigger DIE = new EntityClassTrigger("die");
 }

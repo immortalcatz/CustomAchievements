@@ -27,9 +27,13 @@ public class TriggerHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onLivingDeath(LivingDeathEvent event) {
         EntityLivingBase defender = event.entityLiving;
-        Entity attacker = event.source.getEntity();
-        if (attacker instanceof EntityPlayer) {
-            TriggerRegistry.triggerAchievements(Triggers.KILL, defender.getClass(), (EntityPlayer) attacker);
+        Entity attacker = event.source.getSourceOfDamage();
+        if (defender != null && attacker != null) {
+            if (attacker instanceof EntityPlayer) {
+                TriggerRegistry.triggerAchievements(Triggers.KILL, defender.getClass(), (EntityPlayer) attacker);
+            } else if (defender instanceof EntityPlayer) {
+                TriggerRegistry.triggerAchievements(Triggers.DIE, attacker.getClass(), (EntityPlayer) defender);
+            }
         }
     }
 }
