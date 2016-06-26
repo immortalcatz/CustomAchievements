@@ -8,6 +8,9 @@ import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.stats.Achievement;
+import net.minecraft.stats.StatList;
+import net.minecraft.util.StringUtils;
 import net.minecraftforge.oredict.OreDictionary;
 
 public class Utils {
@@ -15,6 +18,10 @@ public class Utils {
     private static final String ORE_PREFIX = "*:";
 
     public static ItemStack getItemStackByText(String text) {
+        if (StringUtils.isNullOrEmpty(text)) {
+            return null;
+        }
+
         String[] args = text.split(" ");
         Item item = getItemByText(args[0]);
         int amount = 1;
@@ -77,6 +84,14 @@ public class Utils {
         }
 
         return builder.toString();
+    }
+
+    public static Achievement getAchievementById(String id) {
+        if (StringUtils.isNullOrEmpty(id)) {
+            return null;
+        } else {
+            return (Achievement) StatList.func_151177_a(String.format("achievement.%s", id));
+        }
     }
 
     public static Object getDataByObject(Object obj) {

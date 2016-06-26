@@ -1,20 +1,22 @@
 package io.github.mribby.customachievements;
 
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.github.mribby.customachievements.trigger.Trigger;
 import io.github.mribby.customachievements.trigger.TriggerHandler;
-import net.minecraft.item.ItemStack;
+import io.github.mribby.customachievements.trigger.TriggerRegistry;
 import net.minecraft.stats.Achievement;
-import net.minecraft.stats.StatList;
 import net.minecraft.util.ChatComponentText;
+import net.minecraftforge.common.AchievementPage;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class AchievementHolder {
-    private String mods;
+    private String[] mods;
+    private String page;
     private String id;
     private String name;
     private String description;
@@ -24,73 +26,39 @@ public class AchievementHolder {
     private boolean special;
     private Map<Trigger, Object> triggers;
 
-    private transient String[] modIds;
-    private transient ItemStack itemStack;
-    private transient Achievement parentAchievement;
     private transient Achievement achievement;
     private transient Map<Trigger, Object> triggerDataMap;
 
-    public String[] getModIds() {
-        if (modIds == null && mods != null) {
-            modIds = mods.split(" ");
-        }
-        return modIds;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public int getColumn() {
-        return position[0];
-    }
-
-    public int getRow() {
-        return position[1];
-    }
-
-    public ItemStack getItemStack() {
-        if (itemStack == null && icon != null) {
-            itemStack = Utils.getItemStackByText(icon);
-        }
-        return itemStack;
-    }
-
-    public Achievement getParent() {
-        if (parentAchievement == null && parent != null) {
-            parentAchievement = (Achievement) StatList.func_151177_a(String.format("achievement.%s", parent));
-        }
-        return parentAchievement;
-    }
-
-    public boolean isSpecial() {
-        return special;
-    }
-
-    public Achievement getAchievement() {
-        if (achievement == null) {
-            achievement = new CustomAchievement();
-        }
-        return achievement;
-    }
-
-    public void registerTriggers(TriggerHandler triggerHandler) {
-        if (triggers != null) {
-            triggerDataMap = new HashMap<Trigger, Object>();
-            for (Map.Entry<Trigger, Object> entry : triggers.entrySet()) {
-                Trigger trigger = entry.getKey();
-                Object data = readTriggerData(trigger, entry.getValue());
-                triggerDataMap.put(trigger, data);
-                triggerHandler.registerAchievementTrigger(trigger, this);
+    public void registerAchievement() {
+        try {
+            if (mods != null) {
+                for (String modId : mods) {
+                    if (!Loader.isModLoaded(modId)) {
+                        return;
+                    }
+                }
             }
+            achievement = new CustomAchievement().registerStat();
+            if (page != null) {
+                AchievementPage achievementPage = AchievementPage.getAchievementPage(page);
+                if (achievementPage != null) {
+                    achievementPage.getAchievements().add(achievement);
+                } else {
+                    achievementPage = new AchievementPage(page, achievement);
+                    AchievementPage.registerAchievementPage(achievementPage);
+                }
+            }
+            if (triggers != null) {
+                triggerDataMap = new HashMap<Trigger, Object>();
+                for (Map.Entry<Trigger, Object> entry : triggers.entrySet()) {
+                    Trigger trigger = entry.getKey();
+                    Object data = readTriggerData(trigger, entry.getValue());
+                    triggerDataMap.put(trigger, data);
+                    TriggerRegistry.registerAchievementTrigger(trigger, this);
+                }
+            }
+        } catch (Exception e) {
+            CustomAchievementsMod.logger.error(String.format("Could not register achievement (ID: %s)", id), e);
         }
     }
 
@@ -107,28 +75,31 @@ public class AchievementHolder {
         }
     }
 
+    public Achievement getAchievement() {
+        return achievement;
+    }
+
     public Object getTriggerData(Trigger trigger) {
         return triggerDataMap != null ? triggerDataMap.get(trigger) : null;
     }
 
     private class CustomAchievement extends Achievement {
         public CustomAchievement() {
-            super("achievement." + getId(), getId(), getColumn(), getRow(), getItemStack(), getParent());
-            if (getParent() == null) {
+            super("achievement." + id, id, position[0], position[1], Utils.getItemStackByText(icon), Utils.getAchievementById(parent));
+            if (parentAchievement == null) {
                 initIndependentStat();
             }
-            if (isSpecial()) {
+            if (special) {
                 setSpecial();
             }
-            if (getName() != null) {
-                statName = new ChatComponentText(getName());
+            if (name != null) {
+                statName = new ChatComponentText(name);
             }
         }
 
         @Override
         @SideOnly(Side.CLIENT)
         public String getDescription() {
-            String description = AchievementHolder.this.getDescription();
             return description != null ? description : super.getDescription();
         }
     }

@@ -61,22 +61,8 @@ public class CustomAchievementsMod {
         FMLCommonHandler.instance().bus().register(triggerHandler);
         MinecraftForge.EVENT_BUS.register(triggerHandler);
 
-        registration:
         for (AchievementHolder achievementHolder : achievementHolders) {
-            try {
-                String[] modIds = achievementHolder.getModIds();
-                if (modIds != null) {
-                    for (String modId : modIds) {
-                        if (!Loader.isModLoaded(modId)) {
-                            continue registration;
-                        }
-                    }
-                }
-                achievementHolder.getAchievement().registerStat();
-                achievementHolder.registerTriggers(triggerHandler);
-            } catch (Exception e) {
-                logger.error(String.format("Could not register achievement! ID: %s", achievementHolder.getId()), e);
-            }
+            achievementHolder.registerAchievement();
         }
     }
 
